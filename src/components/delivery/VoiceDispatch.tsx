@@ -16,9 +16,9 @@ const WAVE = Array.from({ length: 46 }, (_, index) =>
 
 function buildTranscript(parcel: Parcel) {
   if (parcel.gig) {
-    return `Evening dispatch confirmed for parcel ${parcel.id}. ${parcel.gig.rider} from ${parcel.gig.partner}, bike ${parcel.gig.plate}, will collect your ${parcel.weightKg} kilogram parcel from ${parcel.hub} and reach your doorstep by ${parcel.gig.eta}, inside the ${parcel.slot} window. Your four digit doorstep OTP is ${parcel.deliveryOtp}. Share it only after the parcel is in your hands. Thank you for choosing Favourable Delivery.`;
+    return `Evening dispatch confirmed for parcel ${parcel.id}. ${parcel.gig.rider} from ${parcel.gig.partner}, bike ${parcel.gig.plate}, will collect your ${parcel.weightKg} kilogram parcel from ${parcel.hub} and reach your doorstep by ${parcel.gig.eta}, inside the ${parcel.slot} window. Your four digit doorstep OTP is ${parcel.deliveryOtp}. Share it only after the parcel is in your hands. Thank you for using LastMileSync.`;
   }
-  return `Parcel ${parcel.id} from ${parcel.carrier} is currently held at ${parcel.hub} in ${parcel.city}. The daytime delivery attempt was missed, so the parcel is waiting for your instructions. Open the intercept panel to choose an evening window and a hyperlocal rider. A full rider briefing, including your pickup and doorstep OTP, will be generated the moment you confirm.`;
+  return `Parcel ${parcel.id} from ${parcel.carrier} is currently held at ${parcel.hub} in ${parcel.city}. The daytime delivery attempt was missed, so the parcel is waiting for your instructions. Open the booking panel to choose an evening window, a delivery address and a hyperlocal rider. A full rider briefing, including your pickup and doorstep OTP, will be generated the moment you confirm.`;
 }
 
 export function VoiceDispatch({ parcel }: { parcel: Parcel }) {
@@ -43,7 +43,7 @@ export function VoiceDispatch({ parcel }: { parcel: Parcel }) {
 
   useEffect(() => {
     stopPlayback();
-    // Rebuilding the script means any in-flight briefing is stale.
+    // A new parcel means any in-flight briefing is stale.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transcript]);
 
@@ -133,35 +133,35 @@ export function VoiceDispatch({ parcel }: { parcel: Parcel }) {
   }
 
   return (
-    <section className="relative flex flex-col overflow-hidden border border-ink bg-ink text-paper lg:sticky lg:top-24">
+    <section className="relative flex flex-col overflow-hidden rounded-xl border border-border bg-[#080e18]">
       <div className="pointer-events-none absolute -right-16 -top-24 size-64 rounded-full bg-route/10 blur-3xl" />
-      <div className="relative border-b border-white/10 p-6 sm:p-7">
+      <div className="relative border-b border-border p-5 sm:p-6">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Volume2 className="size-3.5 text-route" strokeWidth={1.6} />
-            <p className="text-[9px] uppercase tracking-[0.22em] text-white/50">
+            <Volume2 className="size-3.5 text-route" strokeWidth={1.8} />
+            <p className="eyebrow text-muted-foreground">
               ElevenLabs · voice dispatch
             </p>
           </div>
-          <span className="border border-white/15 px-2 py-1 text-[9px] uppercase tracking-[0.14em] text-white/55">
+          <span className="rounded-full border border-route/25 bg-route-soft px-2 py-0.5 text-[9px] uppercase tracking-[0.1em] text-route-deep mono">
             AI voice
           </span>
         </div>
-        <h3 className="mt-4 font-display text-[27px] leading-tight text-paper">
-          Live Voice Dispatch Alert
+        <h3 className="mt-3 font-display text-[22px] font-semibold leading-tight tracking-[-0.02em] text-foreground">
+          Live voice dispatch alert
         </h3>
-        <p className="mt-1.5 text-[12px] text-white/50">
+        <p className="mt-1 text-[11px] text-muted-foreground">
           Automated briefing · rider, arrival window and OTP
         </p>
       </div>
 
-      <div className="relative p-6 sm:p-7">
+      <div className="relative flex flex-1 flex-col p-5 sm:p-6">
         <div className="flex items-center gap-4">
           <button
             type="button"
             onClick={togglePlayback}
             aria-label={playing ? "Pause voice briefing" : "Play voice briefing"}
-            className="flex size-12 shrink-0 items-center justify-center rounded-full bg-route text-ink transition-transform hover:scale-[1.04] active:scale-95"
+            className="flex size-11 shrink-0 items-center justify-center rounded-full bg-route text-primary-foreground transition-transform hover:scale-[1.04] active:scale-95"
           >
             {playing ? (
               <Pause className="size-4" fill="currentColor" strokeWidth={0} />
@@ -176,10 +176,12 @@ export function VoiceDispatch({ parcel }: { parcel: Parcel }) {
 
           <div className="min-w-0 flex-1">
             <div className="flex items-baseline justify-between gap-3">
-              <p className="text-[11px] uppercase tracking-[0.16em] text-white/70">
+              <p className="text-[9px] uppercase tracking-[0.1em] text-foreground/70 mono">
                 {playing ? "Playing briefing" : "Play voice briefing"}
               </p>
-              <p className="text-[10px] tabular-nums text-white/40">0:24</p>
+              <p className="text-[10px] tabular-nums text-muted-foreground/50 mono">
+                0:24
+              </p>
             </div>
             <div
               className="mt-2.5 flex h-8 items-center justify-between gap-[2px]"
@@ -190,7 +192,7 @@ export function VoiceDispatch({ parcel }: { parcel: Parcel }) {
                   key={index}
                   className={cn(
                     "w-[2px] shrink-0 rounded-full bg-route",
-                    playing ? "wave-bar" : "opacity-35",
+                    playing ? "wave-bar" : "opacity-30",
                   )}
                   style={{
                     height: `${playing ? height : Math.max(14, height * 0.45)}%`,
@@ -203,25 +205,25 @@ export function VoiceDispatch({ parcel }: { parcel: Parcel }) {
           </div>
         </div>
 
-        <div className="mt-5 border border-white/10 bg-white/[0.035] p-4">
+        <div className="mt-4 rounded-lg border border-border bg-white/[0.03] p-3.5">
           <div className="flex items-center justify-between">
-            <p className="text-[9px] uppercase tracking-[0.2em] text-white/40">
+            <p className="text-[9px] uppercase tracking-[0.1em] text-muted-foreground/60 mono">
               Transcript
             </p>
-            <p className="text-[9px] uppercase tracking-[0.14em] text-route/80">
+            <p className="text-[9px] uppercase tracking-[0.1em] text-route-deep mono">
               Live parcel state
             </p>
           </div>
-          <p className="mt-2.5 max-h-44 overflow-y-auto pr-1 text-[12.5px] leading-6 text-white/70 chat-scroll">
+          <p className="chat-scroll mt-2 max-h-36 overflow-y-auto pr-1 text-[12px] leading-6 text-foreground/70">
             {transcript}
           </p>
         </div>
 
-        <div className="mt-4">
+        <div className="mt-3.5">
           <button
             type="button"
             onClick={() => setShowSource((open) => !open)}
-            className="flex w-full items-center justify-between gap-3 text-[10px] uppercase tracking-[0.14em] text-white/45 transition-colors hover:text-white/75"
+            className="flex w-full items-center justify-between gap-3 text-[9px] uppercase tracking-[0.1em] text-muted-foreground/60 transition-colors hover:text-foreground/80 mono"
           >
             <span>Use real ElevenLabs audio</span>
             <ChevronDown
@@ -233,33 +235,33 @@ export function VoiceDispatch({ parcel }: { parcel: Parcel }) {
           </button>
 
           {showSource && (
-            <div className="animate-rise mt-3 border border-white/10 bg-white/[0.03] p-3.5">
+            <div className="animate-rise mt-2.5 rounded-lg border border-border bg-white/[0.03] p-3">
               <label
                 htmlFor="voice-url"
-                className="text-[9px] uppercase tracking-[0.18em] text-white/40"
+                className="text-[9px] uppercase tracking-[0.1em] text-muted-foreground/60 mono"
               >
                 Paste a public MP3 URL
               </label>
-              <div className="mt-2 flex gap-2">
+              <div className="mt-1.5 flex gap-2">
                 <input
                   id="voice-url"
                   value={urlDraft}
                   onChange={(event) => setUrlDraft(event.target.value)}
                   placeholder="https://…/briefing.mp3"
                   spellCheck={false}
-                  className="h-9 min-w-0 flex-1 border border-white/15 bg-transparent px-2.5 text-[12px] text-paper outline-none placeholder:text-white/25 focus:border-route/60"
+                  className="h-8 min-w-0 flex-1 rounded border border-border bg-background px-2.5 text-[11px] text-foreground outline-none placeholder:text-muted-foreground/40 focus:border-route/50"
                 />
                 <button
                   type="button"
                   onClick={applyUrl}
-                  className="h-9 shrink-0 border border-route/40 px-3 text-[10px] uppercase tracking-[0.12em] text-route transition-colors hover:bg-route/10"
+                  className="h-8 shrink-0 rounded border border-route/40 px-2.5 text-[9px] uppercase tracking-[0.08em] text-route-deep transition-colors hover:bg-route-soft mono"
                 >
                   Load
                 </button>
               </div>
 
-              <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-white/10 pt-3">
-                <label className="flex cursor-pointer items-center gap-2 border border-white/15 px-2.5 py-1.5 text-[10px] uppercase tracking-[0.12em] text-white/65 transition-colors hover:border-white/30 hover:text-white">
+              <div className="mt-2.5 flex flex-wrap items-center gap-2 border-t border-border pt-2.5">
+                <label className="flex cursor-pointer items-center gap-1.5 rounded border border-border px-2 py-1.5 text-[9px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:border-white/25 hover:text-foreground mono">
                   <Upload className="size-3" />
                   Upload MP3
                   <input
@@ -270,33 +272,33 @@ export function VoiceDispatch({ parcel }: { parcel: Parcel }) {
                   />
                 </label>
                 {sourceName ? (
-                  <span className="flex min-w-0 items-center gap-2 text-[10px] text-route/90">
+                  <span className="flex min-w-0 items-center gap-2 text-[10px] text-route-deep">
                     <span className="truncate">{sourceName}</span>
                     <button
                       type="button"
                       onClick={resetSource}
                       aria-label="Reset to simulated voice"
-                      className="shrink-0 text-white/45 transition-colors hover:text-white"
+                      className="shrink-0 text-muted-foreground/60 transition-colors hover:text-foreground"
                     >
                       <RotateCcw className="size-3" />
                     </button>
                   </span>
                 ) : (
-                  <span className="text-[10px] text-white/35">
-                    Falls back to the browser voice narrator
+                  <span className="text-[10px] text-muted-foreground/50">
+                    Falls back to the browser narrator
                   </span>
                 )}
               </div>
 
               {audioError && (
-                <p className="mt-2 text-[11px] text-hub">{audioError}</p>
+                <p className="mt-2 text-[10px] text-hub-deep">{audioError}</p>
               )}
             </div>
           )}
         </div>
       </div>
 
-      <div className="relative mt-auto flex items-center justify-between border-t border-white/10 px-6 py-3 text-[9px] uppercase tracking-[0.16em] text-white/35 sm:px-7">
+      <div className="relative mt-auto flex items-center justify-between border-t border-border px-5 py-2.5 text-[9px] uppercase tracking-[0.1em] text-muted-foreground/40 mono sm:px-6">
         <span>ElevenLabs Flash v2.1</span>
         <span className="flex items-center gap-1.5">
           <span className="size-1 rounded-full bg-route" />

@@ -13,6 +13,27 @@ export interface GigAssignment {
   eta: string;
 }
 
+export interface DeliveryPlace {
+  label: string;
+  line1: string;
+  city: string;
+  pincode: string;
+}
+
+export interface ContactInfo {
+  name: string;
+  phone: string;
+}
+
+export interface Booking {
+  place: DeliveryPlace;
+  contact: ContactInfo;
+  fee: number;
+  reference: string;
+  method: "UPI" | "Card";
+  paidAt: number;
+}
+
 export interface Parcel {
   id: string;
   carrier: Carrier;
@@ -26,18 +47,45 @@ export interface Parcel {
   gig?: GigAssignment;
   pickupOtp?: string;
   deliveryOtp?: string;
+  booking?: Booking;
 }
 
 export const CARRIER_META: Record<Carrier, { code: string; dot: string }> = {
-  Delhivery: { code: "DLV", dot: "#0f172a" },
-  Ekart: { code: "EKT", dot: "#0a6b4f" },
-  Xpressbees: { code: "XPB", dot: "#b45309" },
+  Delhivery: { code: "DLV", dot: "#34d399" },
+  Ekart: { code: "EKT", dot: "#60a5fa" },
+  Xpressbees: { code: "XPB", dot: "#fbbf24" },
 };
 
 export const STATUS_LABEL: Record<ParcelStage, string> = {
   held: "Held at Local Sorting Hub",
   assigned: "Assigned to Gig Rider",
   delivered: "Delivered — Evening Slot",
+};
+
+export const PLACE_SUGGESTIONS: Record<
+  string,
+  { label: string; line1: string; pincode: string }
+> = {
+  Gurugram: {
+    label: "Home",
+    line1: "402, Aspen Greens, Golf Course Ext Road",
+    pincode: "122018",
+  },
+  Bengaluru: {
+    label: "Home",
+    line1: "12, Palm Meadows, Whitefield Main Road",
+    pincode: "560066",
+  },
+  Mumbai: {
+    label: "Home",
+    line1: "704, Sea Breeze, Andheri East",
+    pincode: "400069",
+  },
+};
+
+export const DEFAULT_CONTACT: ContactInfo = {
+  name: "Aarav Sharma",
+  phone: "+91 98110 44210",
 };
 
 export interface Slot {
@@ -51,13 +99,13 @@ export const SLOTS: Slot[] = [
   {
     id: "8:00 PM – 8:30 PM",
     label: "8:00 PM – 8:30 PM",
-    tag: "Suggested",
+    tag: "Recommended",
     note: "Highest rider density in your sector",
   },
   {
     id: "8:30 PM – 9:00 PM",
     label: "8:30 PM – 9:00 PM",
-    note: "Batched with 2 nearby drops",
+    note: "Batched with two nearby drops",
   },
   {
     id: "9:00 PM – 9:30 PM",
@@ -82,7 +130,7 @@ export const GIG_OPTIONS: GigOption[] = [
     fee: 35,
     pickup: "4 min pickup",
     eta: "18 min ride",
-    note: "Batched with 3 nearby evening drops",
+    note: "Batched with three nearby evening drops",
   },
   {
     slug: "uber",
@@ -120,6 +168,8 @@ export function assignGig(
   parcel: Parcel,
   slot: string,
   gig: GigOption,
+  fee = gig.fee,
+  booking?: Omit<Booking, "fee">,
 ): Parcel {
   const rider = RIDERS[Math.floor(Math.random() * RIDERS.length)];
   return {
@@ -129,13 +179,14 @@ export function assignGig(
     gig: {
       slug: gig.slug,
       partner: gig.partner,
-      fee: gig.fee,
+      fee,
       rider: rider.name,
       plate: rider.plate,
       eta: riderEta(slot),
     },
     pickupOtp: otp(),
     deliveryOtp: otp(),
+    booking: booking ? { ...booking, fee } : parcel.booking,
   };
 }
 
@@ -192,6 +243,19 @@ export const INITIAL_PARCELS: Parcel[] = [
     },
     pickupOtp: "4821",
     deliveryOtp: "7390",
+    booking: {
+      place: {
+        label: "Home",
+        line1: "402, Aspen Greens, Golf Course Ext Road",
+        city: "Gurugram",
+        pincode: "122018",
+      },
+      contact: { name: "Aarav Sharma", phone: "+91 98110 44210" },
+      fee: 35,
+      reference: "LMS-8F21A",
+      method: "UPI",
+      paidAt: Date.now() - 1000 * 60 * 42,
+    },
   },
   {
     id: "EKT-882310",
@@ -213,6 +277,19 @@ export const INITIAL_PARCELS: Parcel[] = [
     },
     pickupOtp: "6104",
     deliveryOtp: "2857",
+    booking: {
+      place: {
+        label: "Home",
+        line1: "12, Palm Meadows, Whitefield Main Road",
+        city: "Bengaluru",
+        pincode: "560066",
+      },
+      contact: { name: "Meera Iyer", phone: "+91 98450 22187" },
+      fee: 42,
+      reference: "LMS-C40D2",
+      method: "Card",
+      paidAt: Date.now() - 1000 * 60 * 65,
+    },
   },
   {
     id: "XPB-660128",
@@ -234,6 +311,19 @@ export const INITIAL_PARCELS: Parcel[] = [
     },
     pickupOtp: "3348",
     deliveryOtp: "9912",
+    booking: {
+      place: {
+        label: "Home",
+        line1: "704, Sea Breeze, Andheri East",
+        city: "Mumbai",
+        pincode: "400069",
+      },
+      contact: { name: "Kabir Nair", phone: "+91 98200 77341" },
+      fee: 35,
+      reference: "LMS-19B77",
+      method: "UPI",
+      paidAt: Date.now() - 1000 * 60 * 60 * 26,
+    },
   },
 ];
 
@@ -267,7 +357,7 @@ const WEBHOOK_SEEDS: Array<
     weightKg: 2.3,
     hub: "Andheri East Hub",
     city: "Mumbai",
-    failedAttempt: "Daytime attempt · 2:02 PM — no answer at door",
+    failedAttempt: "Daytime attempt · 2:02 PM — no answer at the door",
     reattemptCost: 95,
   },
   {
@@ -295,6 +385,10 @@ export function webhookParcel(sequence: number): Parcel {
 
 export function rupees(value: number) {
   return `₹${value.toLocaleString("en-IN")}`;
+}
+
+export function savingsFor(parcel: Parcel, fee: number) {
+  return Math.max(parcel.reattemptCost - fee, 0);
 }
 
 export const SAVED_TO_DATE = 118475;

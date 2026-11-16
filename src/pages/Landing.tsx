@@ -1,5 +1,10 @@
-import { DeliveryApp } from "@/components/delivery/DeliveryApp";
+import { SiteShell } from "@/components/delivery/SiteShell";
+import { TrackingWorkspace } from "@/components/delivery/TrackingWorkspace";
 
 export default function Landing() {
-  return <DeliveryApp initialView="customer" />;
+  return (
+    <SiteShell active="customer">
+      <TrackingWorkspace />
+    </SiteShell>
+  );
 }

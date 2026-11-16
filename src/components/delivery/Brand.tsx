@@ -1,37 +1,56 @@
-export function LogoMark({ className = "size-9" }: { className?: string }) {
+import { Link } from "react-router";
+
+export function LogoMark({ className = "size-8" }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 32 32"
       className={className}
       role="img"
-      aria-label="Favourable Delivery mark"
+      aria-label="LastMileSync"
     >
-      <rect width="32" height="32" rx="2" fill="#0F172A" />
-      <path
-        d="M9 23V9h6.6a4.4 4.4 0 0 1 0 8.8H9"
+      <rect width="32" height="32" rx="7" fill="#0B1220" />
+      <rect
+        x="0.75"
+        y="0.75"
+        width="30.5"
+        height="30.5"
+        rx="6.25"
         fill="none"
-        stroke="#F7F4EC"
-        strokeWidth="1.9"
-        strokeLinecap="square"
+        stroke="rgba(233,238,247,0.16)"
+        strokeWidth="1"
       />
-      <circle cx="23.5" cy="21.5" r="3.2" fill="#10B981" />
+      <path
+        d="M7.5 12.5h12.2l-3.4-3.4"
+        fill="none"
+        stroke="#34D399"
+        strokeWidth="2.3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M24.5 19.5H12.3l3.4 3.4"
+        fill="none"
+        stroke="#E9EEF7"
+        strokeWidth="2.3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="8.2" cy="19.5" r="1.5" fill="#FBBF24" />
     </svg>
   );
 }
 
-export function Brand({ compact = false }: { compact?: boolean }) {
+export function Brand() {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2.5">
       <LogoMark />
       <div className="leading-none">
-        <p className="font-display text-[19px] tracking-tight text-ink">
-          Favourable Delivery
+        <p className="font-display text-[16px] font-semibold tracking-[-0.01em] text-foreground">
+          LastMile<span className="text-route">Sync</span>
         </p>
-        {!compact && (
-          <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-            Last-mile middleware
-          </p>
-        )}
+        <p className="mt-1 hidden text-[9px] uppercase tracking-[0.16em] text-muted-foreground sm:block mono">
+          Evening delivery middleware
+        </p>
       </div>
     </div>
   );
@@ -39,59 +58,57 @@ export function Brand({ compact = false }: { compact?: boolean }) {
 
 export function LiveStatusPill() {
   return (
-    <div className="hidden items-center gap-2.5 border border-border bg-card px-3 py-1.5 lg:flex">
+    <div className="hidden items-center gap-2.5 rounded-full border border-border bg-white/[0.03] px-3 py-1.5 xl:flex">
       <span className="relative flex size-1.5">
         <span className="live-dot absolute inline-flex size-1.5 rounded-full bg-route text-route" />
         <span className="relative inline-flex size-1.5 rounded-full bg-route" />
       </span>
-      <span className="text-[10px] uppercase tracking-[0.16em] text-foreground/80">
-        Middleware Active
+      <span className="text-[9px] uppercase tracking-[0.12em] text-foreground/80 mono">
+        Middleware active
       </span>
-      <span className="text-muted-foreground/50">•</span>
-      <span className="text-[10px] uppercase tracking-[0.16em] text-route-deep">
-        Zapier Synced
+      <span className="text-muted-foreground/40">•</span>
+      <span className="text-[9px] uppercase tracking-[0.12em] text-route-deep mono">
+        Zapier synced
       </span>
     </div>
   );
 }
 
-export function ViewToggle({
-  value,
-  onChange,
-}: {
-  value: "customer" | "hub";
-  onChange: (next: "customer" | "hub") => void;
-}) {
+export function ViewToggle({ value }: { value: "customer" | "operations" }) {
   const items = [
-    { id: "customer" as const, label: "Customer View", short: "Customer" },
-    { id: "hub" as const, label: "Hub Partner Admin View", short: "Hub Admin" },
+    { id: "customer" as const, to: "/", label: "Customer", full: "Customer view" },
+    {
+      id: "operations" as const,
+      to: "/dashboard",
+      label: "Ops",
+      full: "Operations console",
+    },
   ];
+
   return (
-    <div
-      className="inline-flex w-full items-center gap-0.5 border border-border bg-card p-1 sm:w-auto"
-      role="group"
-      aria-label="Switch between customer and hub partner views"
+    <nav
+      aria-label="Switch between the customer and operations views"
+      className="inline-flex items-center gap-1 rounded-lg border border-border bg-white/[0.03] p-1"
     >
       {items.map((item) => {
         const active = value === item.id;
         return (
-          <button
+          <Link
             key={item.id}
-            type="button"
-            aria-pressed={active}
-            onClick={() => onChange(item.id)}
+            to={item.to}
+            aria-current={active ? "page" : undefined}
             className={[
-              "flex-1 whitespace-nowrap px-3.5 py-2 text-[10px] uppercase tracking-[0.16em] transition-colors duration-200 sm:flex-none",
+              "rounded-md px-3 py-1.5 text-[10px] uppercase tracking-[0.1em] transition-colors mono",
               active
-                ? "bg-ink text-paper"
-                : "text-muted-foreground hover:bg-paper-deep/60 hover:text-foreground",
+                ? "bg-route text-primary-foreground"
+                : "text-muted-foreground hover:bg-white/[0.05] hover:text-foreground",
             ].join(" ")}
           >
-            <span className="lg:hidden">{item.short}</span>
-            <span className="hidden lg:inline">{item.label}</span>
-          </button>
+            <span className="lg:hidden">{item.label}</span>
+            <span className="hidden lg:inline">{item.full}</span>
+          </Link>
         );
       })}
-    </div>
+    </nav>
   );
 }

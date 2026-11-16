@@ -1,26 +1,15 @@
 import { useMemo, useState } from "react";
 import { RefreshCw, Search, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useDelivery } from "@/lib/delivery-store";
 import {
   CARRIER_META,
   rupees,
   SAVED_TO_DATE,
   type Carrier,
-  type Parcel,
   type ParcelStage,
 } from "@/lib/delivery-data";
-
-const SHORT_STATUS: Record<ParcelStage, string> = {
-  held: "Held at hub",
-  assigned: "Assigned to rider",
-  delivered: "Delivered",
-};
-
-const STATUS_TONE: Record<ParcelStage, string> = {
-  held: "border-hub/35 bg-hub-soft text-hub-deep",
-  assigned: "border-route-deep/25 bg-route-soft text-route-deep",
-  delivered: "border-route-deep/25 bg-route-soft text-route-deep",
-};
+import { ParcelStatusBadge } from "./ParcelStatusBadge";
 
 const COLUMNS = [
   "Tracking ID",
@@ -32,17 +21,8 @@ const COLUMNS = [
   "Status",
 ];
 
-export function HubLedger({
-  parcels,
-  lastSync,
-  syncPulse,
-  onSync,
-}: {
-  parcels: Parcel[];
-  lastSync: string | null;
-  syncPulse: string | null;
-  onSync: () => void;
-}) {
+export function HubLedger() {
+  const { parcels, syncWebhook, lastSync, syncPulse } = useDelivery();
   const [carrier, setCarrier] = useState<"all" | Carrier>("all");
   const [stage, setStage] = useState<"all" | ParcelStage>("all");
   const [query, setQuery] = useState("");
@@ -75,44 +55,44 @@ export function HubLedger({
   }, [parcels, carrier, stage, query]);
 
   return (
-    <main className="mx-auto w-full max-w-[1180px] px-5 py-10 sm:px-8 sm:py-14">
+    <main className="mx-auto w-full max-w-[1240px] px-5 py-10 sm:px-6 sm:py-14 lg:px-8">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <div className="flex items-center gap-3">
-            <span className="h-px w-9 bg-hub" />
+          <div className="flex items-center gap-2.5">
+            <span className="flex size-1.5 rounded-full bg-route" />
             <p className="eyebrow text-muted-foreground">
-              Hub partner admin · Sector 14
+              Operations console · live
             </p>
           </div>
-          <h1 className="mt-5 max-w-2xl font-display text-[clamp(2.2rem,4.6vw,3.4rem)] leading-[0.98] tracking-[-0.01em] text-ink">
-            The evening network,
+          <h1 className="mt-4 max-w-2xl font-display text-[clamp(2rem,4.5vw,3rem)] font-semibold leading-[1] tracking-[-0.035em] text-foreground">
+            Every diversion,
             <br />
-            <span className="italic">at a glance.</span>
+            on the record.
           </h1>
-          <p className="mt-4 max-w-lg text-[14px] leading-7 text-muted-foreground">
-            Every held parcel, every gig dispatch and every rupee saved on
-            failed re-attempts — synced from the courier webhooks in real time.
+          <p className="mt-4 max-w-lg text-[13.5px] leading-6 text-muted-foreground">
+            Held parcels, matched riders and negotiated fares — streamed from
+            courier webhooks into a single ledger.
           </p>
         </div>
 
-        <div className="flex flex-col items-start gap-2.5 sm:items-end">
+        <div className="flex flex-col items-start gap-2 lg:items-end">
           <button
             type="button"
-            onClick={onSync}
-            className="eyebrow flex h-11 items-center gap-2 bg-ink px-5 text-paper transition-colors hover:bg-ink-soft"
+            onClick={syncWebhook}
+            className="flex h-10 items-center gap-2 rounded-md bg-route px-4 text-[10px] uppercase tracking-[0.1em] text-primary-foreground transition-colors hover:bg-route-deep mono"
           >
-            <RefreshCw
-              className={cn("size-3.5", syncPulse && "animate-spin")}
-            />
+            <RefreshCw className={cn("size-3.5", syncPulse && "animate-spin")} />
             Add / Sync Webhook Row
           </button>
-          <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-            {lastSync ? `Last Zapier sync · ${lastSync}` : "Zapier webhook · 2 min ago"}
+          <p className="text-[9px] uppercase tracking-[0.1em] text-muted-foreground/60 mono">
+            {lastSync
+              ? `Last Zapier sync · ${lastSync}`
+              : "Zapier webhook · 2 min ago"}
           </p>
         </div>
       </div>
 
-      <dl className="mt-9 grid gap-px border border-border bg-border sm:grid-cols-2 xl:grid-cols-4">
+      <dl className="mt-8 grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2 xl:grid-cols-4">
         <Metric
           label="Active Hub Holds"
           value={String(held).padStart(2, "0")}
@@ -128,31 +108,31 @@ export function HubLedger({
         <Metric
           label="Courier Cost Saved (₹)"
           value={rupees(SAVED_TO_DATE + liveSaved)}
-          note={`+${rupees(liveSaved)} from batched gigs`}
+          note={`+${rupees(liveSaved)} from batched fares`}
           accent="route"
         />
-        <div className="bg-ink p-5 text-paper">
+        <div className="bg-route p-5 text-primary-foreground">
           <div className="flex items-center justify-between gap-2">
-            <p className="eyebrow text-[9px] text-white/45">
+            <p className="text-[9px] uppercase tracking-[0.1em] text-primary-foreground/70 mono">
               Zapier Webhook Status
             </p>
-            <Zap className="size-3.5 text-route" />
+            <Zap className="size-3.5 text-primary-foreground/80" />
           </div>
-          <p className="mt-4 flex items-center gap-2 font-display text-[26px] leading-none text-paper">
+          <p className="mt-4 flex items-center gap-2 font-display text-[26px] font-semibold leading-none">
             Active
             <span className="relative flex size-1.5">
-              <span className="live-dot absolute inline-flex size-1.5 rounded-full bg-route text-route" />
-              <span className="relative inline-flex size-1.5 rounded-full bg-route" />
+              <span className="absolute -inset-1 animate-ping rounded-full bg-primary-foreground/25" />
+              <span className="relative inline-flex size-1.5 rounded-full bg-primary-foreground" />
             </span>
           </p>
-          <p className="mt-2 text-[10px] uppercase tracking-[0.12em] text-white/45">
+          <p className="mt-2 text-[9px] uppercase tracking-[0.1em] text-primary-foreground/60 mono">
             {lastSync ? `Synced ${lastSync}` : "Synced 12s ago"}
           </p>
         </div>
       </dl>
 
-      <div className="mt-6 border border-border bg-card">
-        <div className="flex flex-col gap-4 border-b border-border/70 p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between">
+      <div className="panel mt-5 overflow-hidden rounded-xl">
+        <div className="flex flex-col gap-4 border-b border-border p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="flex items-center gap-2">
               <span className="relative flex size-1.5">
@@ -163,13 +143,13 @@ export function HubLedger({
                 Live logistics ledger
               </p>
             </div>
-            <h2 className="mt-2 font-display text-[24px] leading-tight text-ink">
+            <h2 className="mt-2 font-display text-[21px] font-semibold leading-tight tracking-[-0.02em] text-foreground">
               Tonight&apos;s evening batches
             </h2>
           </div>
 
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <div className="flex h-9 items-center gap-2 border border-border bg-paper/50 px-2.5">
+            <div className="flex h-9 items-center gap-2 rounded-md border border-border bg-white/[0.03] px-2.5">
               <Search className="size-3.5 shrink-0 text-muted-foreground" />
               <label htmlFor="ledger-search" className="sr-only">
                 Filter ledger
@@ -179,7 +159,7 @@ export function HubLedger({
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search ID, hub or rider"
-                className="w-full min-w-0 bg-transparent text-[11px] outline-none placeholder:text-muted-foreground/70 sm:w-[172px]"
+                className="w-full min-w-0 bg-transparent text-[11px] outline-none placeholder:text-muted-foreground/50 sm:w-[172px]"
               />
             </div>
             <label className="sr-only" htmlFor="carrier-filter">
@@ -191,7 +171,7 @@ export function HubLedger({
               onChange={(event) =>
                 setCarrier(event.target.value as "all" | Carrier)
               }
-              className="h-9 border border-border bg-paper/50 px-2 text-[11px] text-foreground/80 outline-none focus:border-ink/30"
+              className="h-9 rounded-md border border-border bg-white/[0.03] px-2 text-[11px] text-foreground/80 outline-none focus:border-route/50"
             >
               <option value="all">All carriers</option>
               <option value="Delhivery">Delhivery</option>
@@ -207,7 +187,7 @@ export function HubLedger({
               onChange={(event) =>
                 setStage(event.target.value as "all" | ParcelStage)
               }
-              className="h-9 border border-border bg-paper/50 px-2 text-[11px] text-foreground/80 outline-none focus:border-ink/30"
+              className="h-9 rounded-md border border-border bg-white/[0.03] px-2 text-[11px] text-foreground/80 outline-none focus:border-route/50"
             >
               <option value="all">All statuses</option>
               <option value="held">Held at hub</option>
@@ -220,12 +200,12 @@ export function HubLedger({
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1040px] border-collapse text-left">
             <thead>
-              <tr className="border-b border-border/70 bg-paper/60">
+              <tr className="border-b border-border bg-white/[0.02]">
                 {COLUMNS.map((column) => (
                   <th
                     key={column}
                     scope="col"
-                    className="eyebrow whitespace-nowrap px-4 py-3 text-[9px] font-medium text-muted-foreground"
+                    className="whitespace-nowrap px-4 py-3 text-[9px] font-medium uppercase tracking-[0.1em] text-muted-foreground mono"
                   >
                     {column}
                   </th>
@@ -237,12 +217,12 @@ export function HubLedger({
                 <tr
                   key={parcel.id}
                   className={cn(
-                    "border-b border-border/60 align-top transition-colors last:border-0 hover:bg-paper/50",
+                    "border-b border-border/70 align-top transition-colors last:border-0 hover:bg-white/[0.025]",
                     syncPulse === parcel.id && "row-flash",
                   )}
                 >
                   <td className="px-4 py-4">
-                    <p className="text-[12.5px] text-ink num">{parcel.id}</p>
+                    <p className="text-[12px] text-foreground num">{parcel.id}</p>
                     <p className="mt-0.5 text-[10px] text-muted-foreground">
                       {parcel.weightKg} kg · {parcel.city}
                     </p>
@@ -272,7 +252,7 @@ export function HubLedger({
                         {parcel.slot}
                       </span>
                     ) : (
-                      <span className="text-[12px] text-muted-foreground/60">
+                      <span className="text-[12px] text-muted-foreground/50">
                         —
                       </span>
                     )}
@@ -284,11 +264,11 @@ export function HubLedger({
                           {parcel.gig.partner}
                         </p>
                         <p className="mt-0.5 text-[10px] text-muted-foreground num">
-                          {rupees(parcel.gig.fee)} batched fee
+                          {rupees(parcel.booking?.fee ?? parcel.gig.fee)} fare
                         </p>
                       </>
                     ) : (
-                      <span className="text-[12px] text-muted-foreground/70">
+                      <span className="text-[12px] text-muted-foreground/60">
                         Unassigned
                       </span>
                     )}
@@ -299,39 +279,26 @@ export function HubLedger({
                         <p className="whitespace-nowrap text-[12px] text-foreground/80">
                           {parcel.gig.rider}
                         </p>
-                        <p className="mt-0.5 whitespace-nowrap text-[10px] tracking-[0.06em] text-muted-foreground num">
+                        <p className="mt-0.5 whitespace-nowrap text-[10px] tracking-[0.04em] text-muted-foreground num">
                           {parcel.gig.plate} · {parcel.pickupOtp} /{" "}
                           {parcel.deliveryOtp}
                         </p>
                       </>
                     ) : (
-                      <span className="text-[12px] text-muted-foreground/70">
+                      <span className="text-[12px] text-muted-foreground/60">
                         Awaiting diversion
                       </span>
                     )}
                   </td>
                   <td className="px-4 py-4">
-                    <span
-                      className={cn(
-                        "inline-flex items-center gap-1.5 whitespace-nowrap border px-2 py-1 text-[9px] uppercase tracking-[0.12em]",
-                        STATUS_TONE[parcel.stage],
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "size-1 rounded-full",
-                          parcel.stage === "held" ? "bg-hub" : "bg-route",
-                        )}
-                      />
-                      {SHORT_STATUS[parcel.stage]}
-                    </span>
+                    <ParcelStatusBadge stage={parcel.stage} />
                   </td>
                 </tr>
               ))}
               {rows.length === 0 && (
                 <tr>
                   <td colSpan={7} className="px-4 py-16 text-center">
-                    <p className="font-display text-xl text-ink">
+                    <p className="font-display text-xl text-foreground">
                       No parcels match this filter.
                     </p>
                     <button
@@ -341,7 +308,7 @@ export function HubLedger({
                         setStage("all");
                         setQuery("");
                       }}
-                      className="eyebrow mt-3 border-b border-border pb-0.5 text-[9px] text-muted-foreground hover:text-ink"
+                      className="mt-3 border-b border-border pb-0.5 text-[9px] uppercase tracking-[0.1em] text-muted-foreground transition-colors hover:text-route mono"
                     >
                       Reset filters
                     </button>
@@ -352,7 +319,7 @@ export function HubLedger({
           </table>
         </div>
 
-        <div className="flex flex-col gap-2 border-t border-border/70 px-5 py-3.5 text-[10px] uppercase tracking-[0.12em] text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div className="flex flex-col gap-2 border-t border-border px-5 py-3.5 text-[9px] uppercase tracking-[0.1em] text-muted-foreground/70 sm:flex-row sm:items-center sm:justify-between sm:px-6 mono">
           <span>
             Showing {rows.length} of {parcels.length} parcels
           </span>
@@ -380,18 +347,20 @@ function Metric({
   return (
     <div className="bg-card p-5">
       <div className="flex items-center justify-between gap-2">
-        <p className="eyebrow text-[9px] text-muted-foreground">{label}</p>
+        <p className="text-[9px] uppercase tracking-[0.1em] text-muted-foreground mono">
+          {label}
+        </p>
         <span
           className={cn(
-            "h-px w-5",
+            "h-1 w-1 rounded-full",
             accent === "hub" ? "bg-hub" : "bg-route",
           )}
         />
       </div>
-      <p className="mt-4 font-display text-[26px] leading-none tracking-tight text-ink num">
+      <p className="mt-3 font-display text-[26px] font-semibold leading-none tracking-[-0.02em] text-foreground num">
         {value}
       </p>
-      <p className="mt-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+      <p className="mt-2 text-[9px] uppercase tracking-[0.1em] text-muted-foreground/70 mono">
         {note}
       </p>
     </div>

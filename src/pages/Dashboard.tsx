@@ -1,21 +1,10 @@
-import { DeliveryApp } from "@/components/delivery/DeliveryApp";
-import { useAuth } from "@/hooks/use-auth";
-import { useNavigate } from "react-router";
+import { SiteShell } from "@/components/delivery/SiteShell";
+import { HubLedger } from "@/components/delivery/HubLedger";
 
 export default function Dashboard() {
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
-
-  async function handleSignOut() {
-    await signOut();
-    navigate("/");
-  }
-
   return (
-    <DeliveryApp
-      initialView="hub"
-      signedInAs={user?.name ?? user?.email ?? null}
-      onSignOut={handleSignOut}
-    />
+    <SiteShell active="operations">
+      <HubLedger />
+    </SiteShell>
   );
 }

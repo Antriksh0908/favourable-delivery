@@ -85,14 +85,6 @@ export function ChatAssistant({
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    setMessages([greeting(parcel)]);
-    setTyping(false);
-    setDraft("");
-    // A new parcel starts a fresh conversation thread.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [parcel.id]);
-
-  useEffect(() => {
     const node = scrollRef.current;
     if (node) node.scrollTop = node.scrollHeight;
   }, [messages, typing, open]);

@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { Link } from "react-router";
 import {
   ArrowRight,
@@ -28,11 +28,6 @@ export function TrackingWorkspace() {
   const [query, setQuery] = useState(selectedId);
   const [notFound, setNotFound] = useState<string | null>(null);
   const parcel = parcels.find((item) => item.id === selectedId) ?? parcels[0];
-
-  useEffect(() => {
-    setQuery(selectedId);
-    setNotFound(null);
-  }, [selectedId]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -115,7 +110,11 @@ export function TrackingWorkspace() {
                       <button
                         key={id}
                         type="button"
-                        onClick={() => selectParcel(id)}
+                        onClick={() => {
+                          selectParcel(id);
+                          setQuery(id);
+                          setNotFound(null);
+                        }}
                         className={cn(
                           "inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] tracking-wide transition-colors mono",
                           active

@@ -25,7 +25,6 @@ import {
   savingsFor,
   SLOTS,
   STATUS_LABEL,
-  type GigOption,
   type GigSlug,
   type Parcel,
 } from "@/lib/delivery-data";
@@ -276,9 +275,8 @@ function BookingFlow({ parcel }: { parcel: Parcel }) {
   const [line1, setLine1] = useState(hint.line1);
   const [city, setCity] = useState(parcel.city);
   const [pincode, setPincode] = useState(hint.pincode);
-  const [contactName, setContactName] = useState(
-    user?.name ?? DEFAULT_CONTACT.name,
-  );
+  const [nameOverride, setNameOverride] = useState<string | null>(null);
+  const contactName = nameOverride ?? user?.name ?? DEFAULT_CONTACT.name;
   const [phone, setPhone] = useState(DEFAULT_CONTACT.phone);
   const [slot, setSlot] = useState(SLOTS[0].id);
   const [gigSlug, setGigSlug] = useState<GigSlug>("rapido");
@@ -298,10 +296,6 @@ function BookingFlow({ parcel }: { parcel: Parcel }) {
   const gig = GIG_OPTIONS.find((option) => option.slug === gigSlug) ?? GIG_OPTIONS[0];
   const floor = Math.ceil(gig.fee * 0.6);
   const fee = agreedFee ?? gig.fee;
-
-  useEffect(() => {
-    if (user?.name) setContactName(user.name);
-  }, [user?.name]);
 
   function changeGig(next: GigSlug) {
     setGigSlug(next);
@@ -367,7 +361,7 @@ function BookingFlow({ parcel }: { parcel: Parcel }) {
       setError("Enter a reachable 10-digit phone number.");
       return;
     }
-    if (method === "UPI" && !/^[\w.\-]{2,}@[a-zA-Z]{2,}$/.test(upiId.trim())) {
+    if (method === "UPI" && !/^[\w.-]{2,}@[a-zA-Z]{2,}$/.test(upiId.trim())) {
       setError("Enter a valid UPI ID, for example name@bank.");
       return;
     }
@@ -479,7 +473,7 @@ function BookingFlow({ parcel }: { parcel: Parcel }) {
               <input
                 id="contact-name"
                 value={contactName}
-                onChange={(event) => setContactName(event.target.value)}
+                onChange={(event) => setNameOverride(event.target.value)}
                 placeholder="Who should the rider ask for?"
                 className={cn(fieldClass, "mt-1")}
               />

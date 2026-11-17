@@ -23,6 +23,12 @@ function buildTranscript(parcel: Parcel) {
 
 export function VoiceDispatch({ parcel }: { parcel: Parcel }) {
   const transcript = buildTranscript(parcel);
+
+  // Remount the player when the briefing changes so stale audio always stops.
+  return <VoiceBriefing key={transcript} transcript={transcript} />;
+}
+
+function VoiceBriefing({ transcript }: { transcript: string }) {
   const [playing, setPlaying] = useState(false);
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const [sourceName, setSourceName] = useState<string | null>(null);
@@ -40,12 +46,6 @@ export function VoiceDispatch({ parcel }: { parcel: Parcel }) {
     }
     setPlaying(false);
   }
-
-  useEffect(() => {
-    stopPlayback();
-    // A new parcel means any in-flight briefing is stale.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transcript]);
 
   useEffect(() => {
     audioRef.current?.pause();
@@ -71,7 +71,7 @@ export function VoiceDispatch({ parcel }: { parcel: Parcel }) {
     if (audioSrc) {
       const audio = audioRef.current ?? new Audio(audioSrc);
       audioRef.current = audio;
-      audio.onended = () => setPlaying(false);
+      audio.addEventListener("ended", () => setPlaying(false), { once: true });
       try {
         await audio.play();
         setPlaying(true);

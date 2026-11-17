@@ -109,6 +109,7 @@ export function SiteShell({
 
       {parcel && (
         <ChatAssistant
+          key={parcel.id}
           parcel={parcel}
           onReschedule={(slot) => reschedule(parcel.id, slot)}
         />
